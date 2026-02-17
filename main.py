@@ -1,11 +1,7 @@
 import stoat
 from dotenv import load_dotenv
 import os
-import random
-import json
 from typing import cast
-from pathlib import Path
-import importlib
 import sqlite3
 
 # Modules
@@ -17,7 +13,7 @@ load_dotenv()
 client = stoat.Client()
 
 # Constants
-CHANCE = 100_000
+CHANCE = 1000
 LAST_FACT = -1
 
 global FACTS_FILE
@@ -38,10 +34,6 @@ async def on_ready(event: stoat.ReadyEvent, /):
     # Prepare Database
     global db
     db = sqlite3.connect(os.environ['SQLITE_DB_PATH']).cursor()
-
-
-    await commands["reload"](get_context())
-    print(f'Loaded {len(FACTS)} facts.')
 
     global WELCOME_IMAGE_BYTES
     with open('welcome_image.jpg', 'rb') as f:
@@ -73,19 +65,26 @@ async def on_message(event: stoat.MessageCreateEvent, /):
 
 @client.on(stoat.ServerMemberJoinEvent)
 async def on_member_join(event: stoat.ServerMemberJoinEvent, /):
-   await event.member.send(f"Welcome to the gang {event.member.mention}", attachments=[
+
+    print(f'Member {event.member.tag} joined server {event.member.server_id}')
+
+    (welcome_message, welcome_channel_id, welcome_image_blob) = db.execute('SELECT welcome_message, welcome_channel, welcome_image FROM server_settings WHERE server_id = ?', (event.member.server_id,)).fetchone()
+
+    welcome_message = welcome_message.replace('{user}', event.member.mention)
+
+    print(WELCOME_IMAGE_BYTES)
+
+    await event.member.send(welcome_message, attachments=[
         cast(stoat.ResolvableResource, WELCOME_IMAGE_BYTES)
     ])
 
 def get_context(event = None):
     """Return context dict with shared data for commands."""
     return {
-        'FACTS_FILE': FACTS_FILE,
-        'FACTS': FACTS,
-        'LAST_FACT': LAST_FACT,
-        'CHANCE': CHANCE,
         'EVENT': event, # Represents some kind of stoat event, can be used by commands to access event data if needed
-        'DB': db
+        'DB': db,
+        'CLIENT': client,
+        'COMMANDS': commands,
     }
 
 client.run(os.environ['BOT_TOKEN'])

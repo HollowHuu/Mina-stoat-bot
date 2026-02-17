@@ -1,9 +1,4 @@
-import stoat
-from dotenv import load_dotenv
-import os
-import random
-import json
-from typing import cast
+import sys
 from pathlib import Path
 import importlib
 
@@ -15,10 +10,15 @@ def load_commands():
         if file.name.startswith('_'):
             continue
 
-        module_name = file.stem
-        module = importlib.import_module(f'commands.{module_name}')
+        module_name = f'commands.{file.stem}'
+        
+        # Reload if already loaded, otherwise import fresh
+        if module_name in sys.modules:
+            module = importlib.reload(sys.modules[module_name])
+        else:
+            module = importlib.import_module(module_name)
 
-        if hasattr(module, module_name):
-            commands[module_name] = getattr(module, module_name)
+        if hasattr(module, file.stem):
+            commands[file.stem] = getattr(module, file.stem)
 
     return commands
