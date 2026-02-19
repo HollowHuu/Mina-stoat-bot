@@ -7,9 +7,8 @@ import stoat
 from dotenv import load_dotenv
 
 from modules.handle_fact import handle_fact
-
-# Modules
 from modules.load_commands import load_commands
+from modules.stats import track_message
 
 load_dotenv()
 
@@ -62,6 +61,7 @@ async def on_message(event: stoat.MessageCreateEvent, /):
             # print(len(FACTS))
     else:
         await handle_fact(get_context(event))
+        await track_message(db, event)
 
 
 @client.on(stoat.ServerMemberJoinEvent)

@@ -266,10 +266,10 @@ async def settings_fact_chance(
     client: stoat.Client,
     args: list[str],
 ):
-    """Manage the fact chance percentage for welcome messages."""
+    """Manage the fact chance value (0-100000) for welcome messages."""
 
     if not args:
-        await event.message.reply("Please specify a mode: `set {percentage}` or `view`")
+        await event.message.reply("Please specify a mode: `set {chance}` or `view`")
         return
 
     mode = args[0].lower()
@@ -278,27 +278,30 @@ async def settings_fact_chance(
     if mode == "set":
         if len(args) < 2:
             await event.message.reply(
-                "Please provide a percentage (0-100) for the fact chance."
+                "Please provide a chance (0-100000) for the fact chance."
             )
             return
 
         try:
-            percentage = int(args[1])
-            if 0 <= percentage <= 100:
-                # Placeholder for setting fact chance
-                await event.message.reply(
-                    f"Fact chance functionality not yet implemented. Would set to {percentage}%."
+            chance = int(args[1].replace(".", ""))
+            if 0 <= chance <= 100_000:
+                db.execute(
+                    "update server_settings set fact_chance = ? where server_id = ?;",
+                    [chance, server_id],
                 )
+
+                await event.message.reply(f"Updated chance to {chance}.")
             else:
-                await event.message.reply("Percentage must be between 0 and 100.")
+                await event.message.reply("Chance must be between 0 and 100000.")
         except ValueError:
-            await event.message.reply(
-                "Please provide a valid number for the percentage."
-            )
+            await event.message.reply("Please provide a valid number for the chance.")
 
     elif mode == "view":
-        # Placeholder for viewing fact chance
-        await event.message.reply("Fact chance view functionality not yet implemented.")
+        [chance] = db.execute(
+            "select fact_chance from server_settings where server_id = ?;", [server_id]
+        ).fetchone()
+
+        await event.message.reply(f"Current fact chance is: {chance}/100000!")
 
     else:
-        await event.message.reply("Invalid mode. Use `set {percentage}` or `view`.")
+        await event.message.reply("Invalid mode. Use `set {chance}` or `view`.")
