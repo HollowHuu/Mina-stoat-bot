@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 
 async def handle_fact(context):
+    # TODO - Allow deciamal handling so 0.2% instead of doing whatever this is
     random_chance = random.randrange(
         start=0, stop=100_000, step=1
     )  # Cant have steps of floats in randrange
