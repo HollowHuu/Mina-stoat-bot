@@ -1,0 +1,20 @@
+{
+  "name": "mina",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "revolt.js": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0"
+  }
+}
