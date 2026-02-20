@@ -1,6 +1,6 @@
 import type { Command, Context } from "../../types/types.ts";
 import loadCommands from "../../modules/loadCommands.ts";
-import { commands } from "../../command.ts";
+import { commands } from "../../globals.ts";
 
 const command: Command = {
   data: {

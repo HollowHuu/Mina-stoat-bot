@@ -2,15 +2,29 @@ import { Client, Collection, Message } from "revolt.js";
 import fs from "node:fs";
 import path, { dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import sqlite3 from "sqlite3";
+import { open } from "sqlite";
 
-import { config, configDotenv } from "dotenv";
+import { configDotenv } from "dotenv";
 
 import type { Command, Context } from "./types/types.ts";
 import loadCommands from "./modules/loadCommands.ts";
-import { commands } from "./command.ts";
+import { commands } from "./globals.ts";
+import { exit } from "node:process";
+import { trackMessage } from "./modules/stats.ts";
 
 configDotenv({
   path: ".env.local",
+});
+
+if (!process.env.SQLITE_DB_PATH) {
+  console.log("Missing SQLITE_DB_PATH");
+  exit();
+}
+
+const db = await open({
+  filename: process.env.SQLITE_DB_PATH,
+  driver: sqlite3.Database,
 });
 
 const prefix = "!";
@@ -38,6 +52,9 @@ client.on("messageCreate", async (message) => {
       await message.reply("There was an error while executing the command");
       return;
     }
+  } else {
+    // This is just a normal message
+    await trackMessage(db, message);
   }
 });
 
@@ -48,6 +65,7 @@ function getContext(message: Message | null = null): Context {
     message: message,
     client: client,
     commands: commands,
+    db: db,
   };
 
   return context;

@@ -1,4 +1,4 @@
-import type { Command, Context } from "../../types/types.ts";
+import type { Command, Context, UserStats } from "../../types/types.ts";
 
 const command: Command = {
   data: {
@@ -8,6 +8,10 @@ const command: Command = {
     let msg = ctx.message;
     console.log(ctx.message?.author?.username);
     console.log("hmmm");
+
+    let db = ctx.db;
+    let stats: UserStats[] = await db.all("select * from user_stats;");
+    console.log(stats[0].user_id);
   },
 };
 

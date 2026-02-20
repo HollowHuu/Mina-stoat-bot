@@ -3,7 +3,7 @@ import fs from "node:fs";
 import { pathToFileURL, fileURLToPath } from "node:url";
 
 import type { Command } from "../types/types.ts";
-import { commands } from "../command.ts";
+import { commands } from "../globals.ts";
 
 export default async function loadCommands() {
   commands.clear(); // In case of reload
